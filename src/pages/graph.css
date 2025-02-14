@@ -1,0 +1,26 @@
+.graphs-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* Two columns by default */
+    gap: 20px; /* Space between charts */
+    padding: 20px; /* Padding around the container */
+  }
+  
+  .chart {
+    /* Styles for individual charts */
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  
+  @media (max-width: 1024px) {
+    .graphs-container {
+      grid-template-columns: repeat(2, 1fr); /* Two columns for medium screens */
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .graphs-container {
+      grid-template-columns: 1fr; /* One column for smaller screens */
+    }
+  }
+  
