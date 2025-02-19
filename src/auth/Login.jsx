@@ -2,11 +2,11 @@ import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import CryptoJS from "crypto-js";
-import { useLoginMutation } from "../features/auth/authApiSlice";
 import { setCredentials } from "../features/auth/authSlice";
 import { useToast } from "@chakra-ui/react";
 import Notif_Toast from "../components/Tost";
 import LoginImage from "../assets/Login2.png"; // Import your image from assets
+import { useDloginMutation } from "../features/auth/authApiSlice";
 
 const SECRET_KEY = import.meta.env.VITE_SECRET_KEY;
 
@@ -18,7 +18,7 @@ function Login() {
   const toast = useToast();
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [login] = useLoginMutation();
+  const [dlogin] = useDloginMutation();
 
   const handleEmailChange = (e) => {
     const value = e.target.value;
@@ -46,12 +46,11 @@ function Login() {
           SECRET_KEY
         ).toString();
 
-        const userData = await login({
+        const userData = await dlogin({
           email,
           Password: encryptedPassword,
         }).unwrap();
         if (userData) {
-          console.log(userData,'udaaa')
           dispatch(setCredentials(userData));
           Notif_Toast(
             toast,
@@ -63,7 +62,7 @@ function Login() {
           navigate("/");
         }
       } catch (error) {
-        Notif_Toast(toast, "Error logging in", error.data?.message, "error");
+        Notif_Toast(toast, "Error logging in", error.data, "error");
       }
     }
   };
@@ -146,8 +145,8 @@ function Login() {
             <div className="text-center mt-4">
               <p className="text-sm text-gray-600">
                 Don't have an account?{" "}
-                <a href="/signup" className="text-blue-500 hover:underline">
-                  Sign Up
+                <a href="https://landing-agay.onrender.com/#pricing" className="text-blue-500 hover:underline">
+                  Sign Up and get your license
                 </a>
               </p>
             </div>

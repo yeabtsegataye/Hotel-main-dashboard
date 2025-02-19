@@ -1,45 +1,53 @@
 import { apiSlice } from "../../app/api/apiSlice";
 
 export const authApiSlice = apiSlice.injectEndpoints({
-  endpoints: builder => ({
+  endpoints: (builder) => ({
     login: builder.mutation({
-      query: credentials => ({
-        url: '/auth/login',
-        method: 'POST',
-        body: { ...credentials }
-      })
+      query: (credentials) => ({
+        url: "/auth/login",
+        method: "POST",
+        body: { ...credentials },
+      }),
+    }),
+    dlogin: builder.mutation({
+      query: (credentials) => ({
+        url: "/auth/Dash_login",
+        method: "POST",
+        body: { ...credentials },
+      }),
     }),
     signup: builder.mutation({
-      query: credentials => ({
-        url: '/auth/signup',
-        method: 'POST',
-        body: { ...credentials }
-      })
+      query: (credentials) => ({
+        url: "/auth/signup",
+        method: "POST",
+        body: { ...credentials },
+      }),
     }),
     refresh: builder.mutation({
       query: () => ({
-        url: '/auth/refresh-token',
-        method: 'POST',
+        url: "/auth/refresh-token",
+        method: "POST",
         body: {},
-        credentials: 'include'
-      })
+        credentials: "include",
+      }),
     }),
     verifyToken: builder.mutation({
       query: ({ token }) => ({
-        url: '/auth/verify-token',
-        method: 'POST',
+        url: "/auth/verify-token",
+        method: "POST",
         headers: {
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
-        credentials: 'include'
-      })
-    })
-  })
-})
+        credentials: "include",
+      }),
+    }),
+  }),
+});
 
 export const {
   useLoginMutation,
   useSignupMutation,
   useRefreshMutation,
-  useVerifyTokenMutation
+  useVerifyTokenMutation,
+  useDloginMutation
 } = authApiSlice;
