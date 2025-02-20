@@ -239,16 +239,16 @@ const Header = () => {
                         </span>
                         My Profile
                       </a>
-                      <a
+                      <button
+                      type="button"
                         className="dropdown-item"
-                        href=""
                         onClick={(e) => handleLogout(e)}
                       >
                         <span className="unfold-item-icon mr-3">
                           <i className="gd-power-off"></i>
                         </span>
                         Sign Out
-                      </a>
+                      </button>
                     </div>
                   </div>
                 </a>
