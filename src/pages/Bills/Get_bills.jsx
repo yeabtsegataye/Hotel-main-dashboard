@@ -32,14 +32,14 @@ const GetBills = () => {
     );
   }
 
-  if (error) {
-    console.error("Error fetching bills:", error);
-    return (
-      <p className="flex justify-center items-center h-screen text-red-500">
-        Error fetching bills. {error?.data?.message || "Unknown error"}.
-      </p>
-    );
-  }
+if (error) {
+  console.error("Error fetching bills:", error);
+  return (
+    <p className="flex justify-center items-center h-screen text-red-500">
+      Error fetching bills. {error.data?.message || error.message || "Unknown error"}.
+    </p>
+  );
+}
   
 
   // Filter bills based on search input

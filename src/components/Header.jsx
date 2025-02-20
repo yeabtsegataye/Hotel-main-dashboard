@@ -8,6 +8,7 @@ import axios from "axios";
 import removeCookie from "../auth/removeCookie";
 import Notif_Toast from "./Tost";
 import { useToast } from "@chakra-ui/react";
+import UserDropdown from "./Dropdown";
 
 // import av from "../assets/img/av.png";
 // import SideBar from "./SideBar";
@@ -194,96 +195,7 @@ const Header = () => {
               {/* End User Notifications */}
 
               {/* User Avatar */}
-              <div className="dropdown mx-3 dropdown ml-2">
-                <a
-                  id="profileMenuInvoker"
-                  className="header-complex-invoker"
-                  href="#"
-                  aria-controls="profileMenu"
-                  aria-haspopup="true"
-                  aria-expanded="false"
-                  data-unfold-event="click"
-                  data-unfold-target="#profileMenu"
-                  data-unfold-type="css-animation"
-                  data-unfold-duration="300"
-                  data-unfold-animation-in="fadeIn"
-                  data-unfold-animation-out="fadeOut"
-                >
-                  {/* <img
-                    className="avatar rounded-circle mr-md-0"
-                    style={{ width: "30px", height: "30px" }}
-                    src={av}
-                    alt="John Doe"
-                  /> */}
-                  <i className="gd-user"></i>
-                  <div className="dropdown">
-                    <a
-                      id="dropdownPosition"
-                      className="btn dropdown-toggle text-black-60"
-                      href="#"
-                      aria-haspopup="true"
-                      aria-expanded="false"
-                      data-toggle="dropdown"
-                    >
-                      <span className="align-middle">Tati Taye</span>
-                      <i className="gd-angle-down icon-text icon-text-xs align-middle ml-3"></i>
-                    </a>
-
-                    <div
-                      className="dropdown-menu"
-                      aria-labelledby="dropdownPosition"
-                    >
-                      <a className="dropdown-item" href="#">
-                        <span className="unfold-item-icon mr-3">
-                          <i className="gd-user"></i>
-                        </span>
-                        My Profile
-                      </a>
-                      <button
-                      type="button"
-                        className="dropdown-item"
-                        onClick={(e) => handleLogout(e)}
-                      >
-                        <span className="unfold-item-icon mr-3">
-                          <i className="gd-power-off"></i>
-                        </span>
-                        Sign Out
-                      </button>
-                    </div>
-                  </div>
-                </a>
-
-                <ul
-                  id="profileMenu"
-                  className="unfold unfold-user unfold-light unfold-top unfold-centered position-absolute pt-2 pb-1 mt-4 unfold-css-animation unfold-hidden fadeOut"
-                  aria-labelledby="profileMenuInvoker"
-                  style={{ animationDuration: "300ms" }}
-                >
-                  <li className="unfold-item">
-                    <a
-                      className="unfold-link d-flex align-items-center text-nowrap"
-                      href="/myprofile"
-                    >
-                      <span className="unfold-item-icon mr-3">
-                        <i className="gd-user"></i>
-                      </span>
-                      My Profile
-                    </a>
-                  </li>
-                  <li className="unfold-item unfold-item-has-divider">
-                    <a
-                      className="unfold-link d-flex align-items-center text-nowrap"
-                      href=""
-                      onClick={(e) => handleLogout(e)}
-                    >
-                      <span className="unfold-item-icon mr-3">
-                        <i className="gd-power-off"></i>
-                      </span>
-                      Sign Out
-                    </a>
-                  </li>
-                </ul>
-              </div>
+              <UserDropdown handleLogout={handleLogout} />
               {/* End User Avatar */}
             </div>
           </div>

@@ -50,7 +50,9 @@ function Login() {
           email,
           Password: encryptedPassword,
         }).unwrap();
+
         if (userData) {
+          console.log(userData,'udd')
           dispatch(setCredentials(userData));
           Notif_Toast(
             toast,
