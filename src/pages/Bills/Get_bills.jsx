@@ -34,7 +34,7 @@ const GetBills = () => {
 
   if (error) {
     console.error("Error fetching bills:", error);
-    return <p>Error fetching bills. Please try again later.</p>;
+    return <p className="flex justify-center items-center h-screen text-red-500">Error fetching bills. {error.data.message}.</p>;
   }
 
   // Filter bills based on search input
