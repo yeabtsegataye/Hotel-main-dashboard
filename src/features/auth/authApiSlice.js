@@ -9,6 +9,13 @@ export const authApiSlice = apiSlice.injectEndpoints({
         body: { ...credentials },
       }),
     }),
+    logouts: builder.mutation({
+      query: (credentials) => ({
+        url: "/auth/log-out",
+        method: "POST",
+        body: { ...credentials },
+      }),
+    }),
     dlogin: builder.mutation({
       query: (credentials) => ({
         url: "/auth/Dash_login",
@@ -49,5 +56,6 @@ export const {
   useSignupMutation,
   useRefreshMutation,
   useVerifyTokenMutation,
-  useDloginMutation
+  useDloginMutation,
+  useLogoutsMutation
 } = authApiSlice;

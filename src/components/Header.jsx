@@ -9,11 +9,13 @@ import removeCookie from "../auth/removeCookie";
 import Notif_Toast from "./Tost";
 import { useToast } from "@chakra-ui/react";
 import UserDropdown from "./Dropdown";
+import { useLogoutsMutation } from "../features/auth/authApiSlice";
 
 // import av from "../assets/img/av.png";
 // import SideBar from "./SideBar";
 
 const Header = () => {
+  const [logouts] = useLogoutsMutation()
   const toast = useToast()
   const toggleSidebar = (e) => {
     e.preventDefault();
@@ -47,14 +49,7 @@ const Header = () => {
 
     try {
       // Make the request to the logout endpoint
-      const response = await axios.post(
-        "http://localhost:8000/auth/log-out",
-        {},
-        {
-          withCredentials: true, // Include cookies in the request
-        }
-      );
-
+      const response = await logouts()
       if (response.status === 201) {
         // Dispatch the logOut action to clear the Redux state
         dispatch(logOut());
