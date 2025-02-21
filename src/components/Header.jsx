@@ -50,7 +50,7 @@ const Header = () => {
     try {
       // Make the request to the logout endpoint
       const response = await logouts()
-      if (response.status === 201) {
+      if (response.ok) {
         // Dispatch the logOut action to clear the Redux state
         dispatch(logOut());
         Notif_Toast(
