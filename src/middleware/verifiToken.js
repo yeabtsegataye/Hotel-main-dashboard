@@ -16,7 +16,7 @@ const verifyToken = async (token, dispatch, refresh, user) => {
     try {
       // Include the `user` object in the request body
       const response = await axios.post(url, { user }, config);
-
+console.log(response,'from verfi')
       return response.data.verified;
     } catch (error) {
       console.log(error.response.data.statusCode);
