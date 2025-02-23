@@ -50,8 +50,8 @@ const Header = () => {
     try {
       // Make the request to the logout endpoint
       const response = await logouts()
-      console.log(response,'log outsssss')
-      if (response.ok) {
+      console.log(response.error,'log outsssss')
+      if (response.error.originalStatus == 200) {
         // Dispatch the logOut action to clear the Redux state
         dispatch(logOut());
         Notif_Toast(
@@ -63,6 +63,7 @@ const Header = () => {
         // Navigate to the login page
         navigate("/Login");
       } else {
+
         console.error("Failed to log out");
         // Handle the error as needed
       }
