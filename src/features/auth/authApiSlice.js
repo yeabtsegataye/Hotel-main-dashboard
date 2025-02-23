@@ -10,10 +10,10 @@ export const authApiSlice = apiSlice.injectEndpoints({
       }),
     }),
     logouts: builder.mutation({
-      query: (credentials) => ({
+      query: () => ({
         url: "/auth/log-out",
         method: "POST",
-        body: { ...credentials },
+        body: {},
       }),
     }),
     dlogin: builder.mutation({
