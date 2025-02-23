@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import { Spinner, useToast, Button } from "@chakra-ui/react";
 import { useAddbillsMutation } from "../../features/Data/dataApiSlice";
+import { useSelector } from "react-redux";
 
 const Add_bills = () => {
   const [billName, setBillName] = useState("");
@@ -12,6 +13,7 @@ const Add_bills = () => {
   const [loading, setLoading] = useState(false);
   const [addbills] = useAddbillsMutation();
   const toast = useToast();
+  const token = useSelector((state) => state.auth.token);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -24,13 +26,13 @@ const Add_bills = () => {
       BL_SUB_Type: subType,
       HT_id: "1",
     };
-
+    
     try {
-      console.log(newBill,'new bill')
-      const response = await addbills( newBill ).unwrap();
+      console.log({ token, ...newBill }, 'request payload');
+       const response = await addbills({ token, ...newBill }).unwrap(); // ✅ Spread the fields
 
+      console.log(response, "fff");
       if (response) {
-        console.log(response, "fff");
         // Success toast
         toast({
           title: "Bill added successfully.",
@@ -39,15 +41,14 @@ const Add_bills = () => {
           isClosable: true,
         });
       }
-      // Clear the form fields
-      setBillName("");
-      setMoney("");
-      setDescription("");
-      setSubType("");
-      setHtId("");
+      // // Clear the form fields
+      // setBillName("");
+      // setMoney("");
+      // setDescription("");
+      // setSubType("");
+      // setHtId("");
     } catch (error) {
       console.error(error);
-
       // Error toast
       toast({
         title: "Failed to add bill.",

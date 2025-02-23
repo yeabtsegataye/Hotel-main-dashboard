@@ -4,10 +4,24 @@ export const authApiSlice = apiSlice.injectEndpoints({
   endpoints: builder => ({
     
     addbills: builder.mutation({
-      query: ({ token, credentials }) => ({
+      query: ({ token, ...credentials }) => ({ // ✅ Destructure credentials
         url: "/bills/add",
         method: "POST",
-        body: { credentials}, // Use the received credentials correctly
+        body: credentials, // ✅ Send the fields directly
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json", // Ensure JSON format
+        },
+        credentials: "include",
+      }),
+    }),
+    
+    
+    addcategory: builder.mutation({
+      query: ({ token, credentials }) => ({
+        url: "/cat/add",
+        method: "POST",
+        body: { ...credentials}, // Use the received credentials correctly
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -29,5 +43,6 @@ export const authApiSlice = apiSlice.injectEndpoints({
 
 export const {
   useAddbillsMutation,
-  useGetbillsQuery
+  useGetbillsQuery,
+  useAddcategoryMutation
 } = authApiSlice;
