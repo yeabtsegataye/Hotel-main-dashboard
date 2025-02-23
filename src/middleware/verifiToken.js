@@ -1,20 +1,21 @@
 import axios from "axios";
-// import { useDispatch } from "react-redux";
 import { logOut } from "../features/auth/authSlice";
-const VITE_API_URL = import.meta.env.VITE_API_URL
 
-const verifyToken = async (token, dispatch, refresh) => {
+const VITE_API_URL = import.meta.env.VITE_API_URL;
+
+const verifyToken = async (token, dispatch, refresh, user) => {
   if (token) {
-    const url = `${VITE_API_URL}/auth/verify-token`; // Adjust the endpoint as needed
+    const url = `${VITE_API_URL}/auth/Dash_verify-token`; // Adjust the endpoint as needed
     const config = {
       headers: {
-        authorization: `Bearer ${token}`, // Add the token as Authorization header
+        Authorization: `Bearer ${token}`, // Add the token as Authorization header
       },
       withCredentials: true, // Include cookies in the request
     };
 
     try {
-      const response = await axios.post(url, {}, config);
+      // Include the `user` object in the request body
+      const response = await axios.post(url, { user }, config);
 
       return response.data.verified;
     } catch (error) {
@@ -25,10 +26,9 @@ const verifyToken = async (token, dispatch, refresh) => {
         dispatch(logOut());
         throw error;
       }
-      // console.error("Error verifying token:", error.response.data);
     }
   } else {
-   return false
+    return false;
   }
 };
 

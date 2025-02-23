@@ -50,7 +50,7 @@ const Header = () => {
     try {
       // Make the request to the logout endpoint
       const response = await logouts()
-      console.log(response.error,'log outsssss')
+      // console.log(response.error,'log outsssss')
       if (response.error.originalStatus == 200) {
         // Dispatch the logOut action to clear the Redux state
         dispatch(logOut());

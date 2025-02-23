@@ -38,9 +38,10 @@ function App() {
   }, [isInitialLoad, refresh]);
 
   const token = useSelector((state) => state.auth.token);
+  const user = useSelector((state) => state.auth.user);
 
   const verified = async () => {
-    const Is_Verified = await verifyToken(token, dispatch, refresh);
+    const Is_Verified = await verifyToken(token, dispatch, refresh , user);
     setIsVerified(Is_Verified);
   };
   verified();
