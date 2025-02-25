@@ -15,7 +15,6 @@ const Add_bills = () => {
   const toast = useToast();
   const token = useSelector((state) => state.auth.token);
   const user = useSelector((state) => state.auth.user);
-
   const handleSubmit = async (event) => {
     event.preventDefault();
     setLoading(true);
@@ -48,13 +47,12 @@ const Add_bills = () => {
       setMoney();
       setDescription("");
       setSubType("");
-      setuser_id("");
     } catch (error) {
       console.error(error);
       // Error toast
       toast({
         title: "Failed to add bill.",
-        description: error?.data || 'something went wrong',
+        description: error?.data.message || 'something went wrong',
         status: "error",
         duration: 3000,
         isClosable: true,

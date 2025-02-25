@@ -220,7 +220,7 @@ const AddNewEmployee = () => {
             isLoading={loading}
             loadingText="Submitting"
             disabled={loading}
-            className="w-full bg-blue-600 text-white rounded-lg py-2 hover:bg-blue-700 focus:ring-2 focus:ring-blue-500"
+            className="bg-blue-600 text-white rounded-lg py-2 hover:bg-blue-700 focus:ring-2 focus:ring-blue-500"
           >
             {loading ? <Spinner size="sm" /> : "Add Employee"}
           </Button>
