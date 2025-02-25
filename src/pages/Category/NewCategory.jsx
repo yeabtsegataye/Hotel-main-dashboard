@@ -3,6 +3,7 @@ import '@fortawesome/fontawesome-free/css/all.min.css';
 import { useAddcategoryMutation } from '../../features/Data/dataApiSlice';
 import { useSelector } from 'react-redux';
 import Notif_Toast from "../../components/Tost";
+import { useToast } from "@chakra-ui/react";
 
 const AddNewCategory = () => {
   const [categoryName, setCategoryName] = useState('');
@@ -12,7 +13,8 @@ const AddNewCategory = () => {
   const [image, setImage] = useState(null);
   const [previewImage, setPreviewImage] = useState(null);
   const [uploading, setUploading] = useState(false);
-  const [addcategory] = useAddcategoryMutation();
+    const toast = useToast();
+    const [addcategory] = useAddcategoryMutation();
   const token = useSelector((state) => state.auth.token);
 
   const handleImageChange = (e) => {
@@ -25,48 +27,52 @@ const AddNewCategory = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
+    // Validate if the image is selected
     if (!image) {
-      alert('Please upload an image.');
+      alert("Please upload an image.");
       return;
     }
-
+  
+    // Create a new FormData object
     const formData = new FormData();
-    formData.append('categoryName', categoryName);
-    formData.append('categoryType', categoryType);
-    formData.append('description', description);
-    formData.append('status', status);
-    formData.append('image', image);
-
+    formData.append("categoryName", categoryName); // Append categoryName
+    formData.append("categoryType", categoryType); // Append categoryType
+    formData.append("description", description); // Append description
+    formData.append("status", status); // Append status
+    formData.append("image", image); // Append the image file
+  
+    // Debugging: log the FormData to check what is being sent
+    console.log("FormData Entries:", Object.fromEntries(formData.entries()));
+  
     setUploading(true);
-console.log(image,'fff')
+  
     try {
+      // Send the formData to the backend
       const response = await addcategory({ token, credentials: formData }).unwrap();
-      console.log('Upload successful:', response);
-      Notif_Toast(
-        toast,
-        "added successful",
-        "You have successfully added new category",
-        "success"
-      );      // Reset form after successful submission
-      setCategoryName('');
-      setCategoryType('');
-      setDescription('');
-      setStatus('Active');
+      console.log("Upload successful:", response);
+      Notif_Toast(toast, "Added Successfully", "New category added", "success");
+  
+      // Reset form after successful submission
+      setCategoryName("");
+      setCategoryType("");
+      setDescription("");
+      setStatus("Active");
       setImage(null);
       setPreviewImage(null);
     } catch (error) {
-      console.error('Upload failed:', error);
+      console.error("Upload failed:", error);
       Notif_Toast(
         toast,
-        "Failed to add category. Please try again.",
-        error.data,
+        "Failed to add category",
+        error.data?.message || "Upload error",
         "error"
       );
     } finally {
       setUploading(false);
     }
   };
+  
 
   return (
     <div className="p-8 w-[95%] md:w-[90%] mt-6 mx-auto border border-gray-200 rounded-lg shadow-lg bg-white">
