@@ -18,15 +18,6 @@ export const authApiSlice = apiSlice.injectEndpoints({
 
     addcategory: builder.mutation({
       query: ({ token, credentials }) => {
-        // const formData = new FormData();
-    
-        // // Append the data from credentials into formData
-        // formData.append("categoryName", credentials.categoryName);
-        // formData.append("categoryType", credentials.categoryType);
-        // formData.append("description", credentials.description);
-        // formData.append("status", credentials.status);
-        // formData.append("image", credentials.image); // Append the image file
-    
         return {
           url: "/cat/add",
           method: "POST",
@@ -39,7 +30,18 @@ export const authApiSlice = apiSlice.injectEndpoints({
         };
       },
     }),
- ///////////////////////////////////   
+
+    getcat: builder.query({
+      query: (token) => ({
+        url: "/cat/get",
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        credentials: "include",
+      }),
+    }),
+    ///////////////////////////////////
     getbills: builder.query({
       query: (token) => ({
         url: "/bills",
@@ -82,4 +84,5 @@ export const {
   useAddcategoryMutation,
   useAddemployeeMutation,
   useGetemployeeQuery,
+  useGetcatQuery
 } = authApiSlice;

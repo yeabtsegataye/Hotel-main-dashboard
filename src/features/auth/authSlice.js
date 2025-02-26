@@ -15,15 +15,17 @@ const authSlice = createSlice({
         },
         Bills :(state, action)=>{
             state.bill = action.payload
-        }
-        ,
+        },
         employees :(state, action)=>{
-            state.bill = action.payload
+            state.employees = action.payload
+        },
+        category :(state, action)=>{
+            state.category = action.payload
         }
     },
 })
 
-export const { setCredentials, logOut,Bills,employees } = authSlice.actions
+export const { setCredentials, logOut,Bills,employees,category } = authSlice.actions
 
 export default authSlice.reducer
 
@@ -31,3 +33,4 @@ export const selectCurrentUser = (state) => state.auth.user
 export const selectCurrentToken = (state) => state.auth.token
 export const selectCurrentBill = (state) =>state.auth.Bills
 export const selectCurrentEmployee = (state) =>state.auth.employees
+export const selectCurrentCategory = (state) =>state.auth.category
