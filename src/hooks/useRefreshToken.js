@@ -17,14 +17,14 @@ const useRefreshToken = () => {
         dispatch(logOut());
       }
     } catch (error) {
-      // toast({
-      //   title: "Session expired",
-      //   description: "Login again",
-      //   status: "error",
-      //   duration: 5000,
-      //   isClosable: true,
-      //   position: "bottom",
-      // });
+      toast({
+        title: "Session expired",
+        description: "Login again",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+        position: "bottom",
+      });
       dispatch(logOut());
     }
   };

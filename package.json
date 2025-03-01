@@ -18,6 +18,7 @@
     "bootstrap": "^4.3.1",
     "cross-env": "^5.1",
     "crypto-js": "^4.2.0",
+    "dompurify": "^3.2.4",
     "jquery": "^3.3.1",
     "jquery-migrate": "^3.0.1",
     "jquery-mousewheel": "^3.1.13",
@@ -35,7 +36,8 @@
     "sass": "^1.18.0",
     "sass-loader": "7.*",
     "vue-template-compiler": "^2.6.10",
-    "webpack-jquery-ui": "^2.0.1"
+    "webpack-jquery-ui": "^2.0.1",
+    "yup": "^1.6.1"
   },
   "devDependencies": {
     "@types/react": "^18.3.3",

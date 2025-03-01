@@ -16,8 +16,8 @@ const verifyToken = async (token, dispatch, refresh, user) => {
     try {
       // Include the `user` object in the request body
       const response = await axios.post(url, { user }, config);
-console.log(response,'from verfi')
-      return response.data.verified;
+     // console.log('resss',response)
+      return {isverifed:response.data.verified,role:response.data.role};
     } catch (error) {
       console.log(error.response.data.statusCode);
       if (error.response.data.statusCode === 403) {

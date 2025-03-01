@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useGetcatQuery } from "../../features/Data/dataApiSlice";
 import ClipLoader from "react-spinners/ClipLoader"; // Import ClipLoader for the loading spinner
 import { category } from "../../features/auth/authSlice";
+import DOMPurify from "dompurify"; // Import DOMPurify for sanitization
 
 const AllCategories = () => {
   const dispatch = useDispatch();
@@ -41,12 +42,14 @@ const AllCategories = () => {
     );
   }
 
-  // Filter categories based on search input
+  // Sanitize the search term
+  const sanitizedSearchTerm = DOMPurify.sanitize(searchTerm);
+
+  // Filter categories based on sanitized search input
   const filteredCategories = categoryData
     ? categoryData.filter((category) => {
-        const fullName =
-          `${category.name} ${category.description}`.toLowerCase();
-        return fullName.includes(searchTerm.toLowerCase());
+        const fullName = `${category.name} ${category.description}`.toLowerCase();
+        return fullName.includes(sanitizedSearchTerm.toLowerCase());
       })
     : [];
 
@@ -68,41 +71,55 @@ const AllCategories = () => {
 
         {/* Categories Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredCategories.map((category) => (
-            <div
-              key={category.id}
-              className="bg-white rounded-lg shadow-sm overflow-hidden w-full"
-            >
-              <img
-                src={`${import.meta.env.VITE_API_URL}/${category.image}`}
-                alt={category.name}
-                className="w-full h-48 object-cover"
-              />
-              <div className="p-4">
-                <h3 className="text-lg font-bold mb-2">{category.name}</h3>
-                <p className="text-gray-600 mb-4">{category.description}</p>
-                <div className="flex justify-between items-center">
-                  <div className="flex space-x-2">
+          {filteredCategories.map((category) => {
+            // Sanitize dynamic content
+            const sanitizedName = DOMPurify.sanitize(category.name);
+            const sanitizedDescription = DOMPurify.sanitize(category.description);
+            const sanitizedImageUrl = DOMPurify.sanitize(
+              `${import.meta.env.VITE_API_URL}/${category.image}`
+            );
+
+            return (
+              <div
+                key={category.id}
+                className="bg-white rounded-lg shadow-sm overflow-hidden w-full"
+              >
+                <img
+                  src={sanitizedImageUrl}
+                  alt={sanitizedName}
+                  className="w-full h-48 object-cover"
+                  onError={(e) => {
+                    e.target.src = "https://via.placeholder.com/150"; // Fallback image
+                  }}
+                />
+                <div className="p-4">
+                  <h3 className="text-lg font-bold mb-2">{sanitizedName}</h3>
+                  <p className="text-gray-600 mb-4">{sanitizedDescription}</p>
+                  <div className="flex justify-between items-center">
+                    <div className="flex space-x-2">
+                      <i
+                        className="fas fa-edit text-gray-500 cursor-pointer hover:text-blue-700"
+                        title="Edit"
+                        onClick={() => console.log(`Edit ${sanitizedName}`)}
+                      ></i>
+                      <i
+                        className="fas fa-trash text-gray-500 cursor-pointer hover:text-red-700"
+                        title="Delete"
+                        onClick={() => console.log(`Delete ${sanitizedName}`)}
+                      ></i>
+                    </div>
                     <i
-                      className="fas fa-edit text-gray-500 cursor-pointer hover:text-blue-700"
-                      title="Edit"
-                      onClick={() => console.log(`Edit ${category.name}`)}
-                    ></i>
-                    <i
-                      className="fas fa-trash text-gray-500 cursor-pointer hover:text-red-700"
-                      title="Delete"
-                      onClick={() => console.log(`Delete ${category.name}`)}
+                      className="fas fa-eye text-gray-500 cursor-pointer hover:text-green-700"
+                      title="View Services"
+                      onClick={() =>
+                        console.log(`View services for ${sanitizedName}`)
+                      }
                     ></i>
                   </div>
-                  <i
-                    className="fas fa-eye text-gray-500 cursor-pointer hover:text-green-700"
-                    title="View Services"
-                    onClick={() => console.log(`View services for ${category.name}`)}
-                  ></i>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* Add New Category Button */}

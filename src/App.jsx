@@ -1,4 +1,4 @@
-import { Route, Routes, useLocation } from "react-router-dom";
+import { Route, Routes, useLocation, Navigate } from "react-router-dom";
 import Footer from "./components/Footer";
 import "@fortawesome/fontawesome-free/css/all.min.css"; // Import Font Awesome
 import Header from "./components/Header";
@@ -24,27 +24,53 @@ import { Orders } from "./pages/Orders/Orders";
 import { Ingrediants } from "./pages/Ingrediants/Ingrediants";
 import { Comment } from "./pages/Feedback/Comment";
 
+// Protected Route Component
+const ProtectedRoute = ({ element, allowedRoles }) => {
+  const user = useSelector((state) => state.auth.user);
+
+  // If the user is not logged in, redirect to login
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  // If the user's role is not allowed, redirect to the appropriate route
+  if (!allowedRoles.includes(user.role)) {
+    if (user.role === "employee") {
+      return <Navigate to="/orders" replace />;
+    }
+    return <Navigate to="/" replace />; // Fallback for other roles
+  }
+
+  // If the user is allowed, render the element
+  return element;
+};
+
 function App() {
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const refresh = useRefreshToken();
   const dispatch = useDispatch();
   const [isVerified, setIsVerified] = useState(false);
+ // const [role, setRole] = useState("");
 
   useEffect(() => {
     if (isInitialLoad) {
       refresh();
       setIsInitialLoad(false);
+      
     }
+     verified();
   }, [isInitialLoad, refresh]);
 
   const token = useSelector((state) => state.auth.token);
   const user = useSelector((state) => state.auth.user);
 
   const verified = async () => {
-    const Is_Verified = await verifyToken(token, dispatch, refresh , user);
-    setIsVerified(Is_Verified);
+    const { isverifed } = await verifyToken(token, dispatch, refresh, user);
+   // console.log(role, "cccccc");
+    setIsVerified(isverifed);
+   // setRole(role);
   };
-  verified();
+ 
 
   const location = useLocation();
   const authPaths = ["/login", "/signup"];
@@ -61,68 +87,137 @@ function App() {
             {/* Manage Bills Routes */}
             <Route
               path="/bills/add"
-              element={isVerified ? <Add_bills /> : <Login />}
+              element={
+                <ProtectedRoute
+                  element={<Add_bills />}
+                  allowedRoles={["admin"]} // Only admin can access
+                />
+              }
             />
             <Route
               path="/bills/get"
-              element={isVerified ? <Get_bills /> : <Login />}
+              element={
+                <ProtectedRoute
+                  element={<Get_bills />}
+                  allowedRoles={["admin"]} // Only admin can access
+                />
+              }
             />
 
             {/* Manage Employee List Routes */}
             <Route
               path="/employees/add"
-              element={isVerified ? <NewEmployee /> : <Login />}
+              element={
+                <ProtectedRoute
+                  element={<NewEmployee />}
+                  allowedRoles={["admin"]} // Only admin can access
+                />
+              }
             />
             <Route
               path="/employees/get"
-              element={isVerified ? <AllEmployee /> : <Login />}
+              element={
+                <ProtectedRoute
+                  element={<AllEmployee />}
+                  allowedRoles={["admin"]} // Only admin can access
+                />
+              }
             />
 
             {/* Manage Food Categories Routes */}
             <Route
               path="/food-categories/add"
-              element={isVerified ? <NewCategory /> : <Login />}
+              element={
+                <ProtectedRoute
+                  element={<NewCategory />}
+                  allowedRoles={["admin", "employee"]} // Both admin and employee can access
+                />
+              }
             />
             <Route
               path="/food-categories/get"
-              element={isVerified ? <AllCategory /> : <Login />}
+              element={
+                <ProtectedRoute
+                  element={<AllCategory />}
+                  allowedRoles={["admin", "employee"]} // Both admin and employee can access
+                />
+              }
             />
 
             {/* Manage Food List Routes */}
             <Route
               path="/food-list/add"
-              element={isVerified ? <Add_food_list /> : <Login />}
+              element={
+                <ProtectedRoute
+                  element={<Add_food_list />}
+                  allowedRoles={["admin", "employee"]} // Both admin and employee can access
+                />
+              }
             />
             <Route
               path="/food-list/get"
-              element={isVerified ? <Get_food_list /> : <Login />}
+              element={
+                <ProtectedRoute
+                  element={<Get_food_list />}
+                  allowedRoles={["admin", "employee"]} // Both admin and employee can access
+                />
+              }
             />
 
             {/* Profile Route */}
             <Route
               path="/profile"
-              element={isVerified ? <Profile /> : <Login />}
+              element={
+                <ProtectedRoute
+                  element={<Profile />}
+                  allowedRoles={["admin", "employee"]} // Both admin and employee can access
+                />
+              }
             />
 
             {/* Orders List Route */}
             <Route
               path="/orders"
-              element={isVerified ? <Orders /> : <Login />}
+              element={
+                <ProtectedRoute
+                  element={<Orders />}
+                  allowedRoles={["admin", "employee"]} // Both admin and employee can access
+                />
+              }
             />
-            {/* Ingrediants Route */}
 
+            {/* Ingrediants Route */}
             <Route
               path="/ingrediants"
-              element={isVerified ? <Ingrediants /> : <Login />}
+              element={
+                <ProtectedRoute
+                  element={<Ingrediants />}
+                  allowedRoles={["admin", "employee"]} // Both admin and employee can access
+                />
+              }
             />
-            {/* feedback Route */}
 
+            {/* Feedback Route */}
             <Route
               path="/feedback"
-              element={isVerified ? <Comment /> : <Login />}
+              element={
+                <ProtectedRoute
+                  element={<Comment />}
+                  allowedRoles={["admin", "employee"]} // Both admin and employee can access
+                />
+              }
             />
+
             {/* Default Routes */}
-            <Route path="/" element={isVerified ? <Dashboard /> : <Login />} />
+            <Route
+              path="/"
+              element={
+                <ProtectedRoute
+                  element={<Dashboard />}
+                  allowedRoles={["admin"]} // Only admin can access
+                />
+              }
+            />
             <Route
               path="/login"
               element={isVerified ? <Dashboard /> : <Login />}

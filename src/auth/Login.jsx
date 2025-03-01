@@ -5,16 +5,19 @@ import CryptoJS from "crypto-js";
 import { setCredentials } from "../features/auth/authSlice";
 import { useToast } from "@chakra-ui/react";
 import Notif_Toast from "../components/Tost";
-import LoginImage from "../assets/Login2.png"; // Import your image from assets
+import LoginImage from "../assets/Login2.png";
 import { useDloginMutation } from "../features/auth/authApiSlice";
+import { ClipLoader } from "react-spinners"; // Import the spinner component
 
 const SECRET_KEY = import.meta.env.VITE_SECRET_KEY;
 
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [role, setRole] = useState("admin"); // Default role
   const [emailError, setEmailError] = useState("");
   const [formValid, setFormValid] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const toast = useToast();
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -30,6 +33,10 @@ function Login() {
     setPassword(e.target.value);
   };
 
+  const handleRoleChange = (e) => {
+    setRole(e.target.value);
+  };
+
   const validateEmail = (value) => {
     const emailValid = value.match(/^([\w.%+-]+)@([\w-]+\.)+([\w]{2,})$/i);
     setEmailError(emailValid ? "" : "Email is invalid");
@@ -38,9 +45,9 @@ function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
     if (formValid) {
       try {
-        // Encrypt the password
         const encryptedPassword = CryptoJS.AES.encrypt(
           password,
           SECRET_KEY
@@ -49,10 +56,10 @@ function Login() {
         const userData = await dlogin({
           email,
           Password: encryptedPassword,
+          role, // Send role along with credentials
         }).unwrap();
 
         if (userData) {
-          console.log(userData,'udd')
           dispatch(setCredentials(userData));
           Notif_Toast(
             toast,
@@ -60,11 +67,21 @@ function Login() {
             "You have successfully logged in",
             "success"
           );
-
           navigate("/");
         }
       } catch (error) {
-        Notif_Toast(toast, "Error logging in", error.data, "error");
+       // console.log(error, "edd");
+        Notif_Toast(
+          toast,
+          "Error logging in",
+          error?.data?.data || // Access the nested "data" property
+          error?.data?.message ||
+          error?.data ||
+          "Something went wrong",
+          "error"
+        );
+      } finally {
+        setIsLoading(false);
       }
     }
   };
@@ -72,16 +89,13 @@ function Login() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-sky-100 to-sky-200 p-4">
       <div className="w-full max-w-6xl bg-white rounded-lg shadow-lg overflow-hidden flex flex-col md:flex-row">
-        {/* Image Section - Hidden on small screens */}
-        <div className="hidden md:block w-full md:w-1/2  flex items-center justify-center ">
+        <div className="hidden md:block w-full md:w-1/2 flex items-center justify-center ">
           <img
             src={LoginImage}
             alt="Login Illustration"
-            className="w-full h-auto object-cover  flex items-center justify-center"
+            className="w-full h-auto object-cover"
           />
         </div>
-
-        {/* Form Section */}
         <div className="w-full md:w-1/2 p-8">
           <div className="text-center mb-6">
             <h2 className="text-3xl font-bold text-gray-800">Welcome Back!</h2>
@@ -89,11 +103,10 @@ function Login() {
           </div>
           <form onSubmit={handleSubmit}>
             <div className="mb-4">
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Email Address
               </label>
               <input
-                id="email"
                 type="email"
                 className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all ${
                   emailError ? "border-red-500" : email && "border-green-500"
@@ -103,15 +116,15 @@ function Login() {
                 onChange={handleEmailChange}
                 required
               />
-              {emailError && <p className="text-red-500 text-sm mt-1">{emailError}</p>}
+              {emailError && (
+                <p className="text-red-500 text-sm mt-1">{emailError}</p>
+              )}
             </div>
-
             <div className="mb-6">
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Password
               </label>
               <input
-                id="password"
                 type="password"
                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
                 placeholder="Enter your password"
@@ -119,39 +132,45 @@ function Login() {
                 onChange={handlePasswordChange}
                 required
               />
-              <div className="text-right mt-2">
-                <a href="/forgot-password" className="text-sm text-blue-500 hover:underline">
-                  Forgot Password?
-                </a>
-              </div>
             </div>
-
             <div className="mb-6">
-              <label className="flex items-center">
+              <p className="text-sm font-medium text-gray-700 mb-2">
+                Login as:
+              </p>
+              <label className="inline-flex items-center mr-4">
                 <input
-                  type="checkbox"
-                  className="form-checkbox h-4 w-4 text-blue-500 rounded focus:ring-blue-500"
+                  type="radio"
+                  name="role"
+                  value="admin"
+                  checked={role === "admin"}
+                  onChange={handleRoleChange}
+                  className="form-radio h-4 w-4 text-blue-500"
                 />
-                <span className="ml-2 text-sm text-gray-700">Remember Me</span>
+                <span className="ml-2 text-gray-700">Admin</span>
+              </label>
+              <label className="inline-flex items-center">
+                <input
+                  type="radio"
+                  name="role"
+                  value="employee"
+                  checked={role === "employee"}
+                  onChange={handleRoleChange}
+                  className="form-radio h-4 w-4 text-blue-500"
+                />
+                <span className="ml-2 text-gray-700">Employee</span>
               </label>
             </div>
-
             <button
               type="submit"
-              className="w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-              disabled={!formValid}
+              className="w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all flex items-center justify-center"
+              disabled={!formValid || isLoading}
             >
-              Log In
+              {isLoading ? (
+                <ClipLoader color="#ffffff" size={20} /> // Show spinner when loading
+              ) : (
+                "Log In" // Show "Log In" text when not loading
+              )}
             </button>
-
-            <div className="text-center mt-4">
-              <p className="text-sm text-gray-600">
-                Don't have an account?{" "}
-                <a href="https://landing-agay.onrender.com/#pricing" className="text-blue-500 hover:underline">
-                  Sign Up and get your license
-                </a>
-              </p>
-            </div>
           </form>
         </div>
       </div>

@@ -1,62 +1,96 @@
 import React, { useState } from "react";
-import axios from "axios";
 import { Spinner, useToast, Button } from "@chakra-ui/react";
 import { useAddbillsMutation } from "../../features/Data/dataApiSlice";
 import { useSelector } from "react-redux";
+import * as Yup from "yup";
+import DOMPurify from "dompurify"; // Import DOMPurify
+
+// Define validation schema
+const validationSchema = Yup.object().shape({
+  billName: Yup.string()
+    .required("Bill Name is required")
+    .max(50, "Bill Name must be less than 50 characters"),
+  money: Yup.number()
+    .required("Money is required")
+    .positive("Money must be a positive number"),
+  description: Yup.string()
+    .max(200, "Description must be less than 200 characters"),
+  subType: Yup.string()
+    .required("Sub Type is required")
+    .oneOf(["Daily", "Weekly", "Monthly", "yearly"], "Invalid Sub Type"),
+});
 
 const Add_bills = () => {
   const [billName, setBillName] = useState("");
-  const [money, setMoney] = useState();
+  const [money, setMoney] = useState("");
   const [description, setDescription] = useState("");
   const [subType, setSubType] = useState("");
-  const [user_id, setuser_id] = useState("");
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({});
   const [addbills] = useAddbillsMutation();
   const toast = useToast();
   const token = useSelector((state) => state.auth.token);
   const user = useSelector((state) => state.auth.user);
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     setLoading(true);
-    setuser_id(user.id)
-    const newBill = {
-      BL_name: billName,
-      BL_money: Number(money),
-      BL_description: description,
-      BL_SUB_Type: subType,
-      user_id: user_id,
-    };
-    const addBill = {...newBill}
-    
+
+    // Validate inputs
     try {
-      console.log({ token, addBill }, 'request payload');
-       const response = await addbills({ token, credentials:addBill }).unwrap(); // ✅ Spread the fields
-      
-      console.log(response, "fff");
+      await validationSchema.validate(
+        { billName, money, description, subType },
+        { abortEarly: false }
+      );
+
+      // Sanitize inputs using DOMPurify
+      const sanitizedBillName = DOMPurify.sanitize(billName);
+      const sanitizedDescription = DOMPurify.sanitize(description);
+      const sanitizedSubType = DOMPurify.sanitize(subType);
+
+      const newBill = {
+        BL_name: sanitizedBillName,
+        BL_money: Number(money),
+        BL_description: sanitizedDescription,
+        BL_SUB_Type: sanitizedSubType,
+        user_id: user.id,
+      };
+
+      const response = await addbills({ token, credentials: newBill }).unwrap();
+
       if (response) {
-        // Success toast
         toast({
           title: "Bill added successfully.",
           status: "success",
           duration: 3000,
           isClosable: true,
         });
+        // Clear the form fields
+        setBillName("");
+        setMoney("");
+        setDescription("");
+        setSubType("");
+        setErrors({});
       }
-      // Clear the form fields
-      setBillName("");
-      setMoney();
-      setDescription("");
-      setSubType("");
     } catch (error) {
-      console.error(error);
-      // Error toast
-      toast({
-        title: "Failed to add bill.",
-        description: error?.data.message || 'something went wrong',
-        status: "error",
-        duration: 3000,
-        isClosable: true,
-      });
+      if (error.inner) {
+        // Yup validation errors
+        const validationErrors = {};
+        error.inner.forEach((err) => {
+          validationErrors[err.path] = err.message;
+        });
+        setErrors(validationErrors);
+      } else {
+        // API or other errors
+        console.error(error);
+        toast({
+          title: "Failed to add bill.",
+          description: error?.data?.message || "Something went wrong",
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -68,10 +102,7 @@ const Add_bills = () => {
       <form onSubmit={handleSubmit}>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="mb-4">
-            <label
-              htmlFor="billName"
-              className="block text-sm font-medium text-gray-700"
-            >
+            <label htmlFor="billName" className="block text-sm font-medium text-gray-700">
               Bill Name
             </label>
             <input
@@ -79,16 +110,17 @@ const Add_bills = () => {
               id="billName"
               value={billName}
               onChange={(e) => setBillName(e.target.value)}
-              className="block w-full border border-gray-500 rounded-lg p-2 focus:ring-2 focus:ring-blue-500"
+              className={`block w-full border ${
+                errors.billName ? "border-red-500" : "border-gray-500"
+              } rounded-lg p-2 focus:ring-2 focus:ring-blue-500`}
               placeholder="Enter Bill Name"
-              required
             />
+            {errors.billName && (
+              <p className="text-red-500 text-sm mt-1">{errors.billName}</p>
+            )}
           </div>
           <div className="mb-4">
-            <label
-              htmlFor="money"
-              className="block text-sm font-medium text-gray-700"
-            >
+            <label htmlFor="money" className="block text-sm font-medium text-gray-700">
               Money
             </label>
             <input
@@ -96,39 +128,43 @@ const Add_bills = () => {
               id="money"
               value={money}
               onChange={(e) => setMoney(e.target.value)}
-              className="block w-full border border-gray-500 rounded-lg p-2 focus:ring-2 focus:ring-blue-500"
+              className={`block w-full border ${
+                errors.money ? "border-red-500" : "border-gray-500"
+              } rounded-lg p-2 focus:ring-2 focus:ring-blue-500`}
               placeholder="Enter Money"
-              required
             />
+            {errors.money && (
+              <p className="text-red-500 text-sm mt-1">{errors.money}</p>
+            )}
           </div>
           <div className="mb-4">
-            <label
-              htmlFor="description"
-              className="block text-sm font-medium text-gray-700"
-            >
+            <label htmlFor="description" className="block text-sm font-medium text-gray-700">
               Description
             </label>
             <textarea
               id="description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="block w-full border border-gray-500 rounded-lg p-2 focus:ring-2 focus:ring-blue-500"
+              className={`block w-full border ${
+                errors.description ? "border-red-500" : "border-gray-500"
+              } rounded-lg p-2 focus:ring-2 focus:ring-blue-500`}
               placeholder="Enter Description"
             ></textarea>
+            {errors.description && (
+              <p className="text-red-500 text-sm mt-1">{errors.description}</p>
+            )}
           </div>
           <div className="mb-4">
-            <label
-              htmlFor="subType"
-              className="block text-sm font-medium text-gray-700"
-            >
+            <label htmlFor="subType" className="block text-sm font-medium text-gray-700">
               Sub Type
             </label>
             <select
               id="subType"
               value={subType}
               onChange={(e) => setSubType(e.target.value)}
-              className="block w-full border border-gray-500 rounded-lg p-2 focus:ring-2 focus:ring-blue-500"
-              required
+              className={`block w-full border ${
+                errors.subType ? "border-red-500" : "border-gray-500"
+              } rounded-lg p-2 focus:ring-2 focus:ring-blue-500`}
             >
               <option value="" disabled>
                 Select Sub Type
@@ -138,6 +174,9 @@ const Add_bills = () => {
               <option value="Monthly">Monthly</option>
               <option value="yearly">yearly</option>
             </select>
+            {errors.subType && (
+              <p className="text-red-500 text-sm mt-1">{errors.subType}</p>
+            )}
           </div>
         </div>
 
