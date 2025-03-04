@@ -72,8 +72,10 @@ const AddNewEmployee = () => {
         token,
         credentials: sanitizedData,
       }).unwrap();
+
 ///////////////////////////////////////////////////////////////////////
       if (response) {
+        console.log(response,'rsssss')
         toast({
           title: "Employee added.",
           description: `Employee has been successfully added!`,
@@ -111,7 +113,7 @@ const AddNewEmployee = () => {
         console.error(error);
         toast({
           title: "Error adding employee.",
-          description: error?.data?.message || "Something went wrong.",
+          description: error?.data?.message ||error?.data || "Something went wrong.",
           status: "error",
           duration: 3000,
           isClosable: true,

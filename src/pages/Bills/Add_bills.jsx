@@ -114,6 +114,7 @@ const Add_bills = () => {
                 errors.billName ? "border-red-500" : "border-gray-500"
               } rounded-lg p-2 focus:ring-2 focus:ring-blue-500`}
               placeholder="Enter Bill Name"
+              required
             />
             {errors.billName && (
               <p className="text-red-500 text-sm mt-1">{errors.billName}</p>
@@ -132,6 +133,7 @@ const Add_bills = () => {
                 errors.money ? "border-red-500" : "border-gray-500"
               } rounded-lg p-2 focus:ring-2 focus:ring-blue-500`}
               placeholder="Enter Money"
+              required
             />
             {errors.money && (
               <p className="text-red-500 text-sm mt-1">{errors.money}</p>
@@ -165,6 +167,7 @@ const Add_bills = () => {
               className={`block w-full border ${
                 errors.subType ? "border-red-500" : "border-gray-500"
               } rounded-lg p-2 focus:ring-2 focus:ring-blue-500`}
+              required
             >
               <option value="" disabled>
                 Select Sub Type

@@ -15,6 +15,17 @@ export const authApiSlice = apiSlice.injectEndpoints({
         credentials: "include",
       }),
     }),
+    getbills: builder.query({
+      query: (token) => ({
+        url: "/bills",
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        credentials: "include",
+      }),
+    }),
+    ///////////////////////////////////
 
     addcategory: builder.mutation({
       query: ({ token, credentials }) => {
@@ -41,17 +52,7 @@ export const authApiSlice = apiSlice.injectEndpoints({
         credentials: "include",
       }),
     }),
-    ///////////////////////////////////
-    getbills: builder.query({
-      query: (token) => ({
-        url: "/bills",
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        credentials: "include",
-      }),
-    }),
+
     ////////////////////////////
     addemployee: builder.mutation({
       query: ({ token, credentials }) => ({
@@ -75,6 +76,33 @@ export const authApiSlice = apiSlice.injectEndpoints({
       }),
     }),
     //////////////////////////////
+
+    addfood: builder.mutation({
+      query: ({ token, credentials }) => {
+        return {
+          url: "/food/add",
+          method: "POST",
+          body: credentials, // Send FormData to backend
+          headers: {
+            Authorization: `Bearer ${token}`,
+            // Don't set "Content-Type", as the browser will do this for you.
+          },
+          credentials: "include",
+        };
+      },
+    }),
+
+    //////////////////////////////
+    getfood: builder.query({
+      query: ({ token, id }) => ({
+        url: `/food/get/${id}`,
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        credentials: "include",
+      }),
+    }),
   }),
 });
 
@@ -84,5 +112,7 @@ export const {
   useAddcategoryMutation,
   useAddemployeeMutation,
   useGetemployeeQuery,
-  useGetcatQuery
+  useGetcatQuery,
+  useAddfoodMutation,
+  useGetfoodQuery
 } = authApiSlice;

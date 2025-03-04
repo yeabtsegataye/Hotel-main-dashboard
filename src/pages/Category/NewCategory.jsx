@@ -4,6 +4,7 @@ import { useAddcategoryMutation } from "../../features/Data/dataApiSlice";
 import { useSelector } from "react-redux";
 import Notif_Toast from "../../components/Tost";
 import { useToast } from "@chakra-ui/react";
+import DOMPurify from "dompurify"; // For sanitizing inputs
 
 const AddNewCategory = () => {
   const [categoryName, setCategoryName] = useState("");
@@ -28,12 +29,38 @@ const AddNewCategory = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Sanitize inputs
+    const sanitizedCategoryName = DOMPurify.sanitize(categoryName.trim());
+    const sanitizedCategoryType = DOMPurify.sanitize(categoryType.trim());
+    const sanitizedDescription = DOMPurify.sanitize(description.trim());
+
+    // Validate inputs
+    if (!sanitizedCategoryName || !sanitizedCategoryType || !sanitizedDescription) {
+      Notif_Toast(
+        toast,
+        "Invalid Input",
+        "Please fill out all fields.",
+        "error"
+      );
+      return;
+    }
+
+    if (sanitizedDescription.length > 200) {
+      Notif_Toast(
+        toast,
+        "Description Too Long",
+        "Description should not exceed 200 characters.",
+        "error"
+      );
+      return;
+    }
+
     // Validate if the image is selected
     if (!image) {
       Notif_Toast(
         toast,
-        "warning upload image to add category",
-        "Upload image ",
+        "Image Required",
+        "Please upload an image to add the category.",
         "error"
       );
       return;
@@ -41,9 +68,9 @@ const AddNewCategory = () => {
 
     // Create a new FormData object
     const formData = new FormData();
-    formData.append("categoryName", categoryName); // Append categoryName
-    formData.append("categoryType", categoryType); // Append categoryType
-    formData.append("description", description); // Append description
+    formData.append("categoryName", sanitizedCategoryName); // Append sanitized categoryName
+    formData.append("categoryType", sanitizedCategoryType); // Append sanitized categoryType
+    formData.append("description", sanitizedDescription); // Append sanitized description
     formData.append("status", status); // Append status
     formData.append("image", image); // Append the image file
 
@@ -63,7 +90,7 @@ const AddNewCategory = () => {
         Notif_Toast(
           toast,
           "Added Successfully",
-          "New category added",
+          "New category added.",
           "success"
         );
       }
@@ -79,8 +106,8 @@ const AddNewCategory = () => {
       console.error("Upload failed:", error);
       Notif_Toast(
         toast,
-        "Failed to add category",
-        error?.data?.message || "Upload error",
+        "Failed to Add Category",
+        error?.data?.message || "Upload error.",
         "error"
       );
     } finally {
@@ -130,6 +157,7 @@ const AddNewCategory = () => {
               onChange={(e) => setDescription(e.target.value)}
               rows="3"
               required
+              maxLength="200" // Limit description to 200 characters
               className="block w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500"
             />
           </div>
@@ -173,6 +201,7 @@ const AddNewCategory = () => {
                     type="file"
                     onChange={handleImageChange}
                     className="hidden"
+                    accept="image/*" // Restrict to image files
                   />
                 </label>
               </div>
@@ -182,7 +211,7 @@ const AddNewCategory = () => {
           <button
             type="submit"
             disabled={uploading}
-            className=" bg-blue-600 text-white rounded-lg p-2 hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 disabled:bg-blue-300"
+            className="bg-blue-600 text-white rounded-lg p-2 hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 disabled:bg-blue-300"
           >
             {uploading ? "Uploading..." : "Add Category"}
           </button>

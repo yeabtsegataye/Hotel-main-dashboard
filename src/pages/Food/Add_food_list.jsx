@@ -1,47 +1,130 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useAddfoodMutation, useGetcatQuery } from '../../features/Data/dataApiSlice';
+import { useSelector } from "react-redux";
+import Notif_Toast from "../../components/Tost";
+import { useToast } from "@chakra-ui/react";
+import validator from "validator"; // For input sanitization
+import DOMPurify from "dompurify"; // For sanitizing HTML inputs (if needed)
 
 const Add_food_list = () => {
+  const [images, setImages] = useState(null);
   const [foodName, setFoodName] = useState("");
   const [description, setDescription] = useState("");
-  const [price, setPrice] = useState("");
   const [completionTime, setCompletionTime] = useState("");
+  const [price, setPrice] = useState("");
   const [categoryId, setCategoryId] = useState("");
-  const [images, setImages] = useState({ img1: null, img2: null, img3: null });
-  const [video, setVideo] = useState(null);
+  const [previewImage, setPreviewImage] = useState(null);
+  const [categories, setCategories] = useState([]);
+  const [uploading, setUploading] = useState(false);
+  const toast = useToast();
+
+  const token = useSelector((state) => state.auth.token);
+  const { data: categoryData = [], isLoading } = useGetcatQuery(token);
+  const [addFood] = useAddfoodMutation();
+
+  useEffect(() => {
+    if (categoryData.length > 0) {
+      setCategories(categoryData);
+    }
+  }, [categoryData]);
 
   const handleImageChange = (e) => {
-    setImages({ ...images, [e.target.name]: e.target.files[0] });
+    const file = e.target.files[0];
+    if (file) {
+      // Validate image file type
+      if (!file.type.startsWith("image/")) {
+        Notif_Toast(
+          toast,
+          "Invalid File Type",
+          "Please upload an image file (JPEG, PNG, etc.).",
+          "error"
+        );
+        return;
+      }
+      setImages(file);
+      setPreviewImage(URL.createObjectURL(file));
+    }
   };
 
-  const handleVideoChange = (e) => {
-    setVideo(e.target.files[0]);
-  };
-
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
-    const newFood = {
-      FL_name: foodName,
-      FL_descreption: description,
-      FL_money: price,
-      FL_img: images.img1,
-      FL_img2: images.img2,
-      FL_img3: images.img3,
-      FL_video: video,
-      FL_timeOFComplit: completionTime,
-      CA_id: categoryId,
-    };
+    // Input sanitization
+    const sanitizedFoodName = DOMPurify.sanitize(foodName.trim());
+    const sanitizedDescription = DOMPurify.sanitize(description.trim());
 
-    console.log("New Food Item:", newFood);
+    // Validate inputs
+    if (!sanitizedFoodName || !sanitizedDescription || !price || !completionTime || !categoryId || !images) {
+      Notif_Toast(
+        toast,
+        "Missing Fields",
+        "Please fill out all fields and upload an image.",
+        "error"
+      );
+      return;
+    }
 
-    // Clear form fields
-    setFoodName("");
-    setDescription("");
-    setPrice("");
-    setCompletionTime("");
-    setCategoryId("");
-    setImages({ img1: null, img2: null, img3: null });
-    setVideo(null);
+    if (!validator.isNumeric(price)) {
+      Notif_Toast(
+        toast,
+        "Invalid Price",
+        "Price must be a valid number.",
+        "error"
+      );
+      return;
+    }
+
+    if (!validator.isNumeric(categoryId)) {
+      Notif_Toast(
+        toast,
+        "Invalid Category",
+        "Please select a valid category.",
+        "error"
+      );
+      return;
+    }
+
+    // Prepare FormData
+    const formData = new FormData();
+    formData.append("name", sanitizedFoodName);
+    formData.append("description", sanitizedDescription);
+    formData.append("price", Number(price)); // Ensure price is a number
+    formData.append("image", images);
+    formData.append("timeOfComplition", completionTime);
+    formData.append("category_id", Number(categoryId)); // Ensure category_id is a number
+
+    setUploading(true);
+
+    try {
+      const response = await addFood({ token, credentials: formData }).unwrap();
+      console.log("Food added successfully:", response);
+      if (response) {
+        Notif_Toast(
+          toast,
+          "Success",
+          "Food item added successfully!",
+          "success"
+        );
+      }
+      // Clear form fields
+      setFoodName("");
+      setDescription("");
+      setPrice("");
+      setCompletionTime("");
+      setCategoryId("");
+      setImages(null);
+      setPreviewImage(null);
+    } catch (error) {
+      console.error("Error adding food:", error);
+      Notif_Toast(
+        toast,
+        "Error",
+        error.data?.message || "Failed to add food item.",
+        "error"
+      );
+    } finally {
+      setUploading(false);
+    }
   };
 
   return (
@@ -91,7 +174,7 @@ const Add_food_list = () => {
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-2">Time of Completion</label>
             <input
-              type="datetime-local"
+              type="time-local"
               value={completionTime}
               onChange={(e) => setCompletionTime(e.target.value)}
               className="block w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
@@ -99,59 +182,41 @@ const Add_food_list = () => {
             />
           </div>
 
-          {/* Category ID */}
+          {/* Category Dropdown */}
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">Category ID</label>
-            <input
-              type="text"
+            <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
+            <select
               value={categoryId}
               onChange={(e) => setCategoryId(e.target.value)}
               className="block w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-              placeholder="Enter Category ID"
               required
-            />
-          </div>
-
-          {/* Image Uploads */}
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">Upload Images</label>
-            <div className="space-y-3">
-             
-              {[1, 2, 3].map((index) => (
-                <div key={index} className="relative">
-                  <input
-                    type="file"
-                    name={`img${index}`}
-                    onChange={handleImageChange}
-                    className="opacity-0 absolute w-full h-full cursor-pointer"
-                    id={`file-upload-${index}`}
-                  />
-                  <label
-                    htmlFor={`file-upload-${index}`}
-                    className="block w-full border border-gray-300 rounded-lg p-3 bg-white text-gray-700 text-center cursor-pointer hover:bg-gray-50 transition-all"
-                  >
-                    {images[`img${index}`] ? images[`img${index}`].name : `Upload Image ${index}`}
-                  </label>
-                </div>
+            >
+              <option value="">Select a category</option>
+              {categories.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.name}
+                </option>
               ))}
-            </div>
+            </select>
           </div>
 
-          {/* Video Upload */}
+          {/* Image Upload */}
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">Upload Video</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Upload Image</label>
             <div className="relative">
               <input
                 type="file"
-                onChange={handleVideoChange}
+                name="image"
+                onChange={handleImageChange}
                 className="opacity-0 absolute w-full h-full cursor-pointer"
-                id="video-upload"
+                accept="image/*" // Restrict to image files
               />
-              <label
-                htmlFor="video-upload"
-                className="block w-full border border-gray-300 rounded-lg p-3 bg-white text-gray-700 text-center cursor-pointer hover:bg-gray-50 transition-all"
-              >
-                {video ? video.name : "Upload Video"}
+              <label className="block w-full border border-gray-300 rounded-lg p-3 bg-white text-gray-700 text-center cursor-pointer hover:bg-gray-50 transition-all">
+                {previewImage ? (
+                  <img src={previewImage} alt="Preview" className="w-full h-32 object-cover rounded-lg" />
+                ) : (
+                  "Choose an image"
+                )}
               </label>
             </div>
           </div>
@@ -161,9 +226,10 @@ const Add_food_list = () => {
         <div className="mt-6">
           <button
             type="submit"
-            className=" bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-6 rounded-lg transition-all"
+            className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-6 rounded-lg transition-all"
+            disabled={uploading}
           >
-            Add Food Item
+            {uploading ? 'Uploading...' : 'Add Food Item'}
           </button>
         </div>
       </form>
