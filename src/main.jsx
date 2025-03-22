@@ -5,7 +5,7 @@ import { BrowserRouter } from "react-router-dom";
 import { Provider } from "react-redux";
 import { store } from "./app/storage.js";
 import { ChakraProvider } from "@chakra-ui/react";
-//import './index.css'
+import './graindashboard.css'
 
 createRoot(document.getElementById("root")).render(
   <React.StrictMode>

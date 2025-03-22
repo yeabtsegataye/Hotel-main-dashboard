@@ -119,9 +119,9 @@ const SideBar = () => {
                   </span>
                   <span className="side-nav-control-icon d-flex ml-auto">
                     {activeIndex === index ? (
-                      <i className="gd-angle-up icon-text text-xs"></i>
+                      <i className="fas fa-angle-up icon-text text-xs  text-gray-400"></i>
                     ) : (
-                      <i className="gd-angle-down icon-text text-xs"></i>
+                      <i className="fas fa-angle-down icon-text text-xs text-gray-400"></i>
                     )}
                   </span>
                 </header>

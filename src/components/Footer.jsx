@@ -1,33 +1,51 @@
-import React from 'react'
+import React from 'react';
 
 function Footer() {
   return (
-   <>
-        <footer className="small p-3 px-md-4 mt-auto">
-            <div className="row justify-content-between">
-                <div className="col-lg text-center text-lg-left mb-3 mb-lg-0">
-                    <ul className="list-dot list-inline mb-0">
-                        <li className="list-dot-item list-dot-item-not list-inline-item mr-lg-2"><a className="link-dark" href="#">FAQ</a></li>
-                        <li className="list-dot-item list-inline-item mr-lg-2"><a className="link-dark" href="#">Support</a></li>
-                        <li className="list-dot-item list-inline-item mr-lg-2"><a className="link-dark" href="#">Contact us</a></li>
-                    </ul>
-                </div>
+    <>
+      <footer className="text-sm p-3 px-4 md:px-8 mt-auto">
+        <div className="flex flex-col lg:flex-row justify-between items-center">
+          <div className="lg:text-left mb-3 lg:mb-0">
+            <ul className="flex flex-wrap justify-center lg:justify-start space-x-2 lg:space-x-4">
+              <li className="list-none lg:after:content-['·'] lg:after:mx-2">
+                <a href="#" className="text-gray-800 hover:text-gray-600">FAQ</a>
+              </li>
+              <li className="list-none lg:after:content-['·'] lg:after:mx-2">
+                <a href="#" className="text-gray-800 hover:text-gray-600">Support</a>
+              </li>
+              <li className="list-none">
+                <a href="#" className="text-gray-800 hover:text-gray-600">Contact us</a>
+              </li>
+            </ul>
+          </div>
 
-                <div className="col-lg text-center mb-3 mb-lg-0">
-                    <ul className="list-inline mb-0">
-                        <li className="list-inline-item mx-2"><a className="link-muted" href="#"><i className="gd-twitter-alt"></i></a></li>
-                        <li className="list-inline-item mx-2"><a className="link-muted" href="#"><i className="gd-facebook"></i></a></li>
-                        <li className="list-inline-item mx-2"><a className="link-muted" href="#"><i className="gd-github"></i></a></li>
-                    </ul>
-                </div>
+          <div className="mb-3 lg:mb-0">
+            <ul className="flex space-x-4">
+              <li>
+                <a href="#" className="text-gray-500 hover:text-gray-700">
+                  <i className="gd-twitter-alt"></i>
+                </a>
+              </li>
+              <li>
+                <a href="#" className="text-gray-500 hover:text-gray-700">
+                  <i className="gd-facebook"></i>
+                </a>
+              </li>
+              <li>
+                <a href="#" className="text-gray-500 hover:text-gray-700">
+                  <i className="gd-github"></i>
+                </a>
+              </li>
+            </ul>
+          </div>
 
-                <div className="col-lg text-center text-lg-right">
-                    &copy; 2019 Graindashboard. All Rights Reserved.
-                </div>
-            </div>
-        </footer>
-   </>
-  )
+          <div className="text-center lg:text-right">
+            &copy; 2019 Graindashboard. All Rights Reserved.
+          </div>
+        </div>
+      </footer>
+    </>
+  );
 }
 
-export default Footer
+export default Footer;

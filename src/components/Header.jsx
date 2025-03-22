@@ -4,19 +4,18 @@ import logo from "../assets/img/logo.png";
 import { logOut } from "../features/auth/authSlice";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import removeCookie from "../auth/removeCookie";
 import Notif_Toast from "./Tost";
 import { useToast } from "@chakra-ui/react";
 import UserDropdown from "./Dropdown";
 import { useLogoutsMutation } from "../features/auth/authApiSlice";
-
-// import av from "../assets/img/av.png";
-// import SideBar from "./SideBar";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faBars, faBell, faInfoCircle, faTimes, faUser } from '@fortawesome/free-solid-svg-icons';
 
 const Header = () => {
-  const [logouts] = useLogoutsMutation()
-  const toast = useToast()
+  const [logouts] = useLogoutsMutation();
+  const toast = useToast();
+
   const toggleSidebar = (e) => {
     e.preventDefault();
     const body = document.body;
@@ -24,13 +23,12 @@ const Header = () => {
     if (window.innerWidth > 992) {
       body.classList.toggle("side-nav-closed");
       body.classList.toggle("side-nav-minified");
-      // Find all elements with the "sidebar-heading" class
       const sidebarHeadings = document.querySelectorAll(".sidebar-heading");
       sidebarHeadings.forEach((element) => {
         if (element.style.display === "none") {
-          element.style.display = "block"; // Show element
+          element.style.display = "block";
         } else {
-          element.style.display = "none"; // Hide element
+          element.style.display = "none";
         }
       });
     } else {
@@ -39,7 +37,6 @@ const Header = () => {
     }
   };
 
-  /////////////////
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -48,11 +45,8 @@ const Header = () => {
     removeCookie("refresh_token");
 
     try {
-      // Make the request to the logout endpoint
-      const response = await logouts()
-      // console.log(response.error,'log outsssss')
-      if (response.error.originalStatus == 200) {
-        // Dispatch the logOut action to clear the Redux state
+      const response = await logouts();
+      if (response.error.originalStatus === 200) {
         dispatch(logOut());
         Notif_Toast(
           toast,
@@ -60,147 +54,109 @@ const Header = () => {
           "You have successfully logged out",
           "success"
         );
-        // Navigate to the login page
         navigate("/Login");
       } else {
-
         console.error("Failed to log out");
-        // Handle the error as needed
       }
     } catch (error) {
       console.error("Error logging out:", error);
-      // Handle the error as needed
     }
   };
+
   return (
     <>
-      <header className="header bg-body">
-        <nav className="navbar flex-nowrap p-0">
-          <div className="navbar-brand-wrapper d-flex align-items-center col-auto me-0">
-            {/* Logo For Mobile View */}
-            <a className="navbar-brand navbar-brand-mobile" href="/">
+      <header className="fixed top-0 left-0 w-full h-16 bg-white shadow-sm z-50">
+        <nav className="h-full flex items-center justify-between px-5">
+          {/* Left Section: Burger Menu and Logo */}
+          <div className="flex items-center space-x-4">
+            {/* Desktop Logo */}
+            <a className="hidden lg:block mr-8" href="/">
               <img
-                className="img-fluid w-100"
+                className="side-nav-show-on-closed w-auto h-8"
                 src={logoMini}
                 alt="Graindashboard"
               />
-            </a>
-            {/* End Logo For Mobile View */}
-
-            {/* Logo For Desktop View */}
-            <a className="navbar-brand navbar-brand-desktop" href="/">
               <img
-                className="side-nav-show-on-closed"
-                src={logoMini}
-                alt="Graindashboard"
-                style={{ width: "auto", height: "33px" }}
-              />
-              <img
-                className="side-nav-hide-on-closed"
+                className="side-nav-hide-on-closed w-auto h-8"
                 src={logo}
                 alt="Graindashboard"
-                style={{ width: "auto", height: "33px" }}
               />
             </a>
-            {/* End Logo For Desktop View */}
+            {/* Burger Menu */}
+            <a
+              className="cursor-pointer p-2"
+              href="#"
+              onClick={toggleSidebar}
+            >
+              <FontAwesomeIcon icon={faBars} className="text-gray-600 text-xl" />
+            </a>
           </div>
-          <div className="header-content col px-md-3">
-            <div className="d-flex align-items-center">
-              {/* End Side Nav Toggle */}
-              {/* Side Nav Toggle */}
+
+          {/* Right Section: Notifications and User Dropdown */}
+          <div className="flex items-center space-x-6">
+            {/* Notifications Dropdown */}
+            <div className="relative">
               <a
-                className="js-side-nav header-invoker d-flex mr-md-2"
-                href=""
-                onClick={toggleSidebar}
-                id="side_icon"
+                id="notificationsInvoker"
+                className="cursor-pointer p-2 relative"
+                href="#"
               >
-                <i className="gd-align-left"></i>
+                <span className="absolute top-0 right-0 w-2 h-2 bg-blue-500 rounded-full"></span>
+                <FontAwesomeIcon icon={faBell} className="text-gray-600 text-xl pb-1" />
               </a>
-              {/* User Notifications */}
-              <div className="dropdown ml-auto">
-                <a
-                  id="notificationsInvoker"
-                  className="header-invoker dropdown-toggle"
-                  href="#"
-                  aria-haspopup="true"
-                  aria-expanded="false"
-                  data-toggle="dropdown"
-                >
-                  <span className="indicator indicator-bordered indicator-top-right indicator-primary rounded-circle"></span>
-                  <i className="gd-bell"></i>
-                </a>
 
-                <div
-                  className="dropdown-menu dropdown-menu-center py-0 mt-4 w-18_75rem w-md-22_5rem"
-                  aria-labelledby="notificationsInvoker"
-                >
-                  <div className="card dropdown-item">
-                    <div className="card-header d-flex align-items-center border-bottom py-3">
-                      <h5 className="mb-0">Notifications</h5>
-                      <a className="link small ml-auto" href="#">
-                        Clear All
-                      </a>
+              {/* Notifications Dropdown Menu */}
+              <div className="absolute right-0 mt-2 w-72 bg-white shadow-lg rounded-lg py-2 hidden">
+                <div className="px-4 py-3 border-b flex items-center">
+                  <FontAwesomeIcon icon={faUser} className="mr-2" />
+                  <h5 className="font-semibold"> Notifications</h5>
+                  <a className="text-sm text-blue-500 ml-auto" href="#">
+                    Clear All
+                  </a>
+                </div>
+                <div className="divide-y">
+                  <div className="px-4 py-3 hover:bg-gray-50">
+                    <div className="flex items-center">
+                      <FontAwesomeIcon icon={faInfoCircle} className="text-blue-500 mr-2" />
+                      <h6 className="font-semibold">New Update</h6>
+                      <span className="text-sm text-gray-500 ml-auto">
+                        just now
+                      </span>
                     </div>
-
-                    <div className="card-body p-0">
-                      <div className="list-group list-group-flush">
-                        <div className="list-group-item list-group-item-action">
-                          <div className="d-flex align-items-center text-nowrap mb-2">
-                            <i className="gd-info-alt icon-text text-primary mr-2"></i>
-                            <h6 className="font-weight-semi-bold mb-0">
-                              New Update
-                            </h6>
-                            <span className="list-group-item-date text-muted ml-auto">
-                              just now
-                            </span>
-                          </div>
-                          <p className="mb-0">
-                            Order <strong>#10000</strong> has been updated.
-                          </p>
-                          <a
-                            className="list-group-item-closer text-muted"
-                            href="#"
-                          >
-                            <i className="gd-close"></i>
-                          </a>
-                        </div>
-                        <div className="list-group-item list-group-item-action">
-                          <div className="d-flex align-items-center text-nowrap mb-2">
-                            <i className="gd-info-alt icon-text text-primary mr-2"></i>
-                            <h6 className="font-weight-semi-bold mb-0">
-                              New Update
-                            </h6>
-                            <span className="list-group-item-date text-muted ml-auto">
-                              just now
-                            </span>
-                          </div>
-                          <p className="mb-0">
-                            Order <strong>#10001</strong> has been updated.
-                          </p>
-                          <a
-                            className="list-group-item-closer text-muted"
-                            href="#"
-                          >
-                            <i className="gd-close"></i>
-                          </a>
-                        </div>
-                      </div>
+                    <p className="text-sm mt-1">
+                      Order <strong>#10000</strong> has been updated.
+                    </p>
+                    <a className="text-gray-500 hover:text-gray-700" href="#">
+                      <FontAwesomeIcon icon={faTimes} />
+                    </a>
+                  </div>
+                  <div className="px-4 py-3 hover:bg-gray-50">
+                    <div className="flex items-center">
+                      <FontAwesomeIcon icon={faInfoCircle} className="text-blue-500 mr-2" />
+                      <h6 className="font-semibold">New Update</h6>
+                      <span className="text-sm text-gray-500 ml-auto">
+                        just now
+                      </span>
                     </div>
+                    <p className="text-sm mt-1">
+                      Order <strong>#10001</strong> has been updated.
+                    </p>
+                    <a className="text-gray-500 hover:text-gray-700" href="#">
+                      <FontAwesomeIcon icon={faTimes} />
+                    </a>
                   </div>
                 </div>
               </div>
-              {/* End User Notifications */}
-
-              {/* User Avatar */}
-              <UserDropdown handleLogout={handleLogout} />
-              {/* End User Avatar */}
             </div>
+
+            {/* User Dropdown */}
+            <UserDropdown handleLogout={handleLogout} />
           </div>
         </nav>
       </header>
-      {/* <SideBar isOpen={isSidebarOpen} /> */}
     </>
   );
+
 };
 
 export default Header;
