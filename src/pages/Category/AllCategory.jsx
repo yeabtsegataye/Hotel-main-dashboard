@@ -76,7 +76,9 @@ const AllCategories = () => {
             const sanitizedName = DOMPurify.sanitize(category.name);
             const sanitizedDescription = DOMPurify.sanitize(category.description);
             const sanitizedImageUrl = DOMPurify.sanitize(
-              `${import.meta.env.VITE_API_URL}/${category.image}`
+              category.image.startsWith("http")
+                ? category.image // Use full URL if already provided
+                : `${import.meta.env.VITE_API_URL}/${category.image}` // Construct URL if relative
             );
 
             return (
@@ -88,9 +90,9 @@ const AllCategories = () => {
                   src={sanitizedImageUrl}
                   alt={sanitizedName}
                   className="w-full h-48 object-cover"
-                  onError={(e) => {
-                    e.target.src = "https://via.placeholder.com/150"; // Fallback image
-                  }}
+                  // onError={(e) => {
+                  //   e.target.src = "https://via.placeholder.com/150"; // Fallback image
+                  // }}
                 />
                 <div className="p-4">
                   <h3 className="text-lg font-bold mb-2">{sanitizedName}</h3>
