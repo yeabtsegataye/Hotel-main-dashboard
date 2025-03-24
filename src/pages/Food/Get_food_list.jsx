@@ -1,63 +1,84 @@
 import React, { useState, useEffect } from "react";
-import {
-  useGetfoodQuery,
-  useGetcatQuery,
-} from "../../features/Data/dataApiSlice";
+import { useGetfoodQuery, useGetcatQuery } from "../../features/Data/dataApiSlice";
 import { useSelector } from "react-redux";
 import { Spinner } from "@chakra-ui/react"; // For loading spinner
 
 export const Get_food_list = () => {
-  const [categories, setCategories] = useState([]);
   const token = useSelector((state) => state.auth.token);
-  const category = useSelector((state) => state.auth.category);
+  const cachedCategories = useSelector((state) => state.auth.category);
+  
+  // Local State
+  const [categories, setCategories] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState(() => {
+    const savedCategory = localStorage.getItem("selectedCategory");
+    return savedCategory ? JSON.parse(savedCategory) : null;
+  });
 
-  const [selectedCategory, setSelectedCategory] = useState(null);
-
-  // Fetch categories if not available in Redux store
+  // Fetch categories from API
   const {
     data: categoryData = [],
     isLoading: isCategoryLoading,
     error: categoryError,
-  } = useGetcatQuery(token, {
-    skip: !!category, // Skip if categories are already available in the Redux store
-  });
+    isSuccess: isCategorySuccess,
+    refetch: refetchCategories,
+  } = useGetcatQuery(token);
 
+  // Check cache first, otherwise, fetch from API
   useEffect(() => {
-    if (category) {
-      setCategories(category);
-      setSelectedCategory(category[0]?.id); // Set the first category as selected
-    } else if (categoryData) {
+    if (cachedCategories.length > 0) {
+      setCategories(cachedCategories);
+      if (!selectedCategory) {
+        setSelectedCategory(cachedCategories[0]?.id);
+      }
+    } else if (isCategorySuccess) {
       setCategories(categoryData);
-      setSelectedCategory(categoryData[0]?.id); // Set the first category as selected
+      if (!selectedCategory) {
+        setSelectedCategory(categoryData[0]?.id);
+      }
     }
-  }, [category, categoryData]);
+  }, [cachedCategories, categoryData, isCategorySuccess, selectedCategory]);
+
+  // Save selected category to localStorage
+  useEffect(() => {
+    if (selectedCategory) {
+      localStorage.setItem("selectedCategory", JSON.stringify(selectedCategory));
+    }
+  }, [selectedCategory]);
 
   // Fetch foods for the selected category
   const {
     data: foods = [],
     isLoading: isFoodLoading,
     isError: isFoodError,
-    refetch,
+    refetch: refetchFoods,
   } = useGetfoodQuery(
     { token, id: selectedCategory },
-    {
-      skip: !selectedCategory, // Skip if no category is selected
-      selectFromResult: ({ data, isLoading, isError }) => ({
-        data,
-        isLoading,
-        isError,
-        isCached: !!data, // Check if data is already in the cache
-      }),
-    }
+    { skip: !selectedCategory } // Skip if no category selected
   );
 
-  // Fixed truncateText function (truncates text by character limit, adds "...")
+  // Refetch foods when category changes
+  useEffect(() => {
+    if (selectedCategory) {
+      refetchFoods();
+    }
+  }, [selectedCategory, refetchFoods]);
+
+  // 🔥 Auto-refetch categories every 10 seconds (if a new one is added)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      refetchCategories();
+    }, 10000); // Refetch every 10 seconds
+
+    return () => clearInterval(interval);
+  }, [refetchCategories]);
+
+  // Truncate function
   const truncateText = (text, charLimit) => {
-    if (!text) return ""; // Handle empty or undefined text
+    if (!text) return "";
     return text.length > charLimit ? text.substring(0, charLimit) + "..." : text;
   };
 
-  // Loading and error states
+  // Handle loading and errors
   if (isCategoryLoading || isFoodLoading) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -107,16 +128,10 @@ export const Get_food_list = () => {
                 className="w-full h-48 object-cover"
               />
               <div className="p-4">
-                <h2 className="text-xl font-semibold">
-                  {truncateText(food.name, 20)} {/* Truncate to 20 characters */}
-                </h2>
-                <p className="text-gray-600 text-sm mt-2">
-                  {truncateText(food.description, 50)} {/* Truncate to 50 characters */}
-                </p>
+                <h2 className="text-xl font-semibold">{truncateText(food.name, 20)}</h2>
+                <p className="text-gray-600 text-sm mt-2">{truncateText(food.description, 50)}</p>
                 <div className="mt-4 flex justify-between items-center">
-                  <span className="text-lg font-bold text-green-600">
-                    ${food.price}
-                  </span>
+                  <span className="text-lg font-bold text-green-600">${food.price}</span>
                   <button className="bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-400 transition">
                     Edit
                   </button>
