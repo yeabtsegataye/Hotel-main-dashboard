@@ -45,30 +45,14 @@ export const Orders = () => {
   useEffect(() => {
     if (!socket) return; // Prevent null errors
 
+    ///////////////
     const handleNewOrder = (newOrder) => {
       console.log(newOrder, "new order from socket");
-
-      setOrders((prevOrders) => {
-        // Check if there's an existing order for the same table
-        const existingTableIndex = prevOrders.findIndex(
-          (order) => order.order_tabel === newOrder.order_tabel
-        );
-
-        if (existingTableIndex !== -1) {
-          // If the table exists, update the existing table's orders
-          const updatedOrders = [...prevOrders];
-          updatedOrders[existingTableIndex] = {
-            ...updatedOrders[existingTableIndex],
-            foods: [...(updatedOrders[existingTableIndex].foods || []), newOrder.food], // Add the new food to the existing table
-          };
-          return updatedOrders;
-        } else {
-          // If the table doesn't exist, add the new order
-          return [{ ...newOrder, foods: [newOrder.food] }, ...prevOrders];
-        }
-      });
+    
+      setOrders((prevOrders) => [...prevOrders, ...(Array.isArray(newOrder) ? newOrder : [newOrder])]);
     };
-
+    
+////////////////////////////
     socket.on("newOrder", handleNewOrder);
 
     // Cleanup socket listener
@@ -111,7 +95,7 @@ export const Orders = () => {
 
       const data = await response.json();
       setOrders(data);
-      console.log(orders, "order fetch");
+      console.log(orders, "order fetch", data);
     } catch (error) {
       console.error("Error fetching orders:", error.message);
       setOrders([]);
@@ -130,15 +114,18 @@ export const Orders = () => {
       // Set loading state for the specific order
       setLoadingOrders((prev) => ({ ...prev, [orderId]: true }));
 
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/order/${orderId}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ order_status: "accepted" }),
-        credentials: "include",
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/order/${orderId}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ order_status: "accepted" }),
+          credentials: "include",
+        }
+      );
 
       if (!response.ok) {
         throw new Error(`Failed to update order: ${response.statusText}`);
@@ -147,9 +134,7 @@ export const Orders = () => {
       // Update the order status in the local state
       setOrders((prevOrders) =>
         prevOrders.map((order) =>
-          order.id === orderId
-            ? { ...order, order_status: "accepted" }
-            : order
+          order.id === orderId ? { ...order, order_status: "accepted" } : order
         )
       );
     } catch (error) {
@@ -167,15 +152,18 @@ export const Orders = () => {
 
   // Count pending orders for each table
   const countPendingOrders = (tableOrders) => {
-    return tableOrders.filter((order) => order.order_status === "pending").length;
+    return tableOrders.filter((order) => order.order_status === "pending")
+      .length;
   };
 
   // Sort tables by the number of pending orders (descending)
-  const sortedTables = Object.entries(groupedOrders).sort(([tableA, ordersA], [tableB, ordersB]) => {
-    const pendingA = countPendingOrders(ordersA);
-    const pendingB = countPendingOrders(ordersB);
-    return pendingB - pendingA; // Sort in descending order
-  });
+  const sortedTables = Object.entries(groupedOrders).sort(
+    ([tableA, ordersA], [tableB, ordersB]) => {
+      const pendingA = countPendingOrders(ordersA);
+      const pendingB = countPendingOrders(ordersB);
+      return pendingB - pendingA; // Sort in descending order
+    }
+  );
 
   return (
     <div className="container mx-auto p-4">
@@ -217,7 +205,9 @@ export const Orders = () => {
                         New Order
                       </span>
                     )}
-                    <h2 className="text-lg font-semibold">Order from Table {table}</h2>
+                    <h2 className="text-lg font-semibold">
+                      Order from Table {table}
+                    </h2>
                     {activeTab === "Pending" && (
                       <span className="text-sm text-red-600 bg-red-100 px-2 py-1 rounded">
                         Pending: {pendingCount}
@@ -239,12 +229,17 @@ export const Orders = () => {
                         <th className="border p-2">Status</th>
                         <th className="border p-2">Food</th>
                         <th className="border p-2">Quantities</th>
-                        {activeTab === "Pending" && <th className="border p-2">Actions</th>}
+                        {activeTab === "Pending" && (
+                          <th className="border p-2">Actions</th>
+                        )}
                       </tr>
                     </thead>
                     <tbody>
                       {tableOrders
-                        .filter((order) => order.order_status === activeTab.toLowerCase())
+                        .filter(
+                          (order) =>
+                            order.order_status === activeTab.toLowerCase()
+                        )
                         .map((order) => (
                           <tr
                             key={order.id}

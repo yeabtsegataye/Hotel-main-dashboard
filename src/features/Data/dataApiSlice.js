@@ -103,6 +103,57 @@ export const authApiSlice = apiSlice.injectEndpoints({
         credentials: "include",
       }),
     }),
+
+    ////////////////////////////
+
+    addingredient: builder.mutation({
+      query: ({ token, credentials }) => {
+        return {
+          url: "/ingredient/add",
+          method: "POST",
+          body: credentials, // Send FormData to backend
+          headers: {
+            Authorization: `Bearer ${token}`,
+            // Don't set "Content-Type", as the browser will do this for you.
+          },
+          credentials: "include",
+        };
+      },
+    }),
+    fetchIngredients: builder.query({
+      query: (token) => ({
+        url: "/ingredient",
+        method: "GET",
+        headers: { Authorization: `Bearer ${token}` },
+      }),
+      credentials: "include",
+    }),
+    deleteIngredient: builder.mutation({
+      query: ({ token, id }) => ({
+        url: `/ingredient/${id}`,
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      }),
+      credentials: "include",
+    }),
+    updateIngredient: builder.mutation({
+      query: ({ token, id, updatedData }) => ({
+        url: `/ingredient/${id}`,
+        method: "PATCH",
+        body: updatedData,
+        headers: { Authorization: `Bearer ${token}` },
+      }),
+      credentials: "include",
+    }),
+    getIngredientsByFood: builder.query({
+      query: ({ token, foodId }) => ({
+        url: `/ingredient/food/${foodId}`,
+        method: "GET",
+        headers: { Authorization: `Bearer ${token}` },
+      }),
+      credentials: "include",
+    }),
+    //////////////////////
   }),
 });
 
@@ -114,5 +165,10 @@ export const {
   useGetemployeeQuery,
   useGetcatQuery,
   useAddfoodMutation,
-  useGetfoodQuery
+  useGetfoodQuery,
+  useAddingredientMutation,
+  useFetchIngredientsQuery,
+  useDeleteIngredientMutation,
+  useUpdateIngredientMutation,
+  useGetIngredientsByFoodQuery
 } = authApiSlice;
